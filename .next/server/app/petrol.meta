@@ -3,5 +3,13 @@
     "x-nextjs-stale-time": "300",
     "x-nextjs-prerender": "1",
     "x-next-cache-tags": "_N_T_/layout,_N_T_/petrol/layout,_N_T_/petrol/page,_N_T_/petrol"
-  }
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/petrol/__PAGE__",
+    "/petrol",
+    "/_index",
+    "/_head"
+  ]
 }
