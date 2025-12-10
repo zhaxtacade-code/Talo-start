@@ -8,8 +8,8 @@ export function Hero() {
   const handleProtectedNav = () => {
     const username = window.prompt("Username")
     const password = window.prompt("Password")
-    const expectedUser = process.env.NEXT_PUBLIC_ADMIN_USER || "admin"
-    const expectedPass = process.env.NEXT_PUBLIC_ADMIN_PASS || "admin"
+    const expectedUser = process.env.NEXT_PUBLIC_ADMIN_USER || "talostar"
+    const expectedPass = process.env.NEXT_PUBLIC_ADMIN_PASS || "talo22##00"
 
     if (username === expectedUser && password === expectedPass) {
       // Grant admin mode for deliveries
