@@ -1,4 +1,4 @@
- "use client"
+"use client"
 
 import { useRouter } from "next/navigation"
 
@@ -12,6 +12,10 @@ export function Hero() {
     const expectedPass = process.env.NEXT_PUBLIC_ADMIN_PASS || "admin"
 
     if (username === expectedUser && password === expectedPass) {
+      // Grant admin mode for deliveries
+      if (typeof window !== "undefined") {
+        localStorage.setItem("admin_mode", "true")
+      }
       router.push("/petrol/deliveries")
     } else {
       alert("Invalid credentials")

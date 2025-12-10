@@ -63,22 +63,6 @@ export default function DeliversPage() {
     }
   }, [])
 
-  const handleAdminLogin = () => {
-    const key = window.prompt("Enter admin key")
-    if (key && key === process.env.NEXT_PUBLIC_ADMIN_KEY) {
-      localStorage.setItem("admin_mode", "true")
-      setIsAdmin(true)
-    } else {
-      alert("Invalid key")
-    }
-  }
-
-  const handleAdminLogout = () => {
-    localStorage.removeItem("admin_mode")
-    setIsAdmin(false)
-    setEditingId(null)
-  }
-
   // Save deliveries to localStorage
   const saveDeliveries = (newDeliveries: Delivery[]) => {
     setDeliveries(newDeliveries)
@@ -194,7 +178,7 @@ export default function DeliversPage() {
       <Header />
 
       <div className="max-w-7xl mx-auto container-padding-x py-16">
-        {/* Back Navigation + Admin */}
+        {/* Back Navigation */}
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link href="/petrol">
             <Button variant="ghost" className="gap-2">
@@ -215,21 +199,6 @@ export default function DeliversPage() {
               Ku Noqo Petrol
             </Button>
           </Link>
-
-          <div className="flex gap-3">
-            {!isAdmin ? (
-              <Button variant="outline" onClick={handleAdminLogin}>
-                Admin Login
-              </Button>
-            ) : (
-              <div className="flex gap-3">
-                <span className="text-sm text-slate-600 self-center">Admin mode</span>
-                <Button variant="outline" onClick={handleAdminLogout}>
-                  Logout
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Form Section (admin only) */}
@@ -326,12 +295,7 @@ export default function DeliversPage() {
               </div>
             </form>
           </div>
-        ) : (
-          <div className="mb-16">
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Diiwaan Gelinta Inta Baxday</h1>
-            <p className="text-slate-600">Fadlan gal admin si aad u diiwaangeliso gaadhista.</p>
-          </div>
-        )}
+        ) : null}
 
         {/* Grand Totals */}
         {deliveries.length > 0 && (

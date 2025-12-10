@@ -1,5 +1,5 @@
 :HL["/_next/static/chunks/ae9febff3bbec8dc.css","style"]
-:HL["/_next/static/chunks/3910a889fb2d64cb.css","style"]
+:HL["/_next/static/chunks/f442cdc5efe3f9d0.css","style"]
 :HL["/_next/static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/premium-fuel-grade-petrol-pump.jpg","image"]
 :HL["/premium-plus-fuel-grade-high-octane.jpg","image"]
@@ -13,4 +13,4 @@
 :HL["/petrol-station-customer-service-area.jpg","image"]
 :HL["/fuel-quality-testing-laboratory-equipment.jpg","image"]
 :HL["/fuel-quality-testing-laboratory-scientist.jpg","image"]
-0:{"buildId":"d80fsaGxCCEDgpvbgtVED","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"petrol","paramType":null,"paramKey":"petrol","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"UtWieZnlB08GZ5HfbZj8l","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"petrol","paramType":null,"paramKey":"petrol","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
