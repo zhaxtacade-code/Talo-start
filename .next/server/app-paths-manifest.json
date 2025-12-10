@@ -1,7 +1,8 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/water/page": "app/water/page.js",
-  "/petrol/page": "app/petrol/page.js",
   "/petrol/deliveries/page": "app/petrol/deliveries/page.js",
-  "/water/orders/page": "app/water/orders/page.js"
+  "/petrol/page": "app/petrol/page.js",
+  "/water/orders/page": "app/water/orders/page.js",
+  "/water/page": "app/water/page.js"
 }

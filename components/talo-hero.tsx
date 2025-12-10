@@ -11,7 +11,6 @@ export function TaloHero() {
         </svg>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
         {/* Logo */}
         <div className="flex justify-center">
