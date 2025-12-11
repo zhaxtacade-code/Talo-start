@@ -150,20 +150,20 @@ export function WaterOrders() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Quantity (optional)</label>
+                    <label className="text-sm font-medium text-slate-700">Imisa xabo (optional)</label>
                   <input
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    placeholder="e.g. 10 bottles or leave blank"
+                      placeholder="Tusaale: 10 xabo ama ka tag bannaan"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Price per Unit</label>
+                    <label className="text-sm font-medium text-slate-700">Qiimaha</label>
                   <input
                     value={pricePerUnit}
                     onChange={(e) => setPricePerUnit(e.target.value)}
-                    placeholder="e.g. 2.50"
+                      placeholder="Tusaale: 2.50"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   />
                 </div>
@@ -194,7 +194,7 @@ export function WaterOrders() {
                 type="submit"
                 className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 rounded-lg transition-colors"
               >
-                Submit Order
+                Diiwaangeli
               </button>
             </form>
           </div>
@@ -230,8 +230,8 @@ export function WaterOrders() {
                   <thead>
                     <tr className="border-b border-slate-200">
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Magaca sheeyga baxay</th>
-                      <th className="py-3 px-4 text-sm font-medium text-slate-700">Quantity</th>
-                      <th className="py-3 px-4 text-sm font-medium text-slate-700">Price/Unit</th>
+                      <th className="py-3 px-4 text-sm font-medium text-slate-700">Imisa xabo</th>
+                      <th className="py-3 px-4 text-sm font-medium text-slate-700">Qiimaha</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Total</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Delivery</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Notes</th>
