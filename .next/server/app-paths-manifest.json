@@ -1,6 +1,10 @@
 {
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/petrol-deliveries/[id]/route": "app/api/petrol-deliveries/[id]/route.js",
+  "/api/petrol-deliveries/route": "app/api/petrol-deliveries/route.js",
+  "/api/water-orders/[id]/route": "app/api/water-orders/[id]/route.js",
+  "/api/water-orders/route": "app/api/water-orders/route.js",
   "/page": "app/page.js",
   "/petrol/deliveries/page": "app/petrol/deliveries/page.js",
   "/petrol/page": "app/petrol/page.js",

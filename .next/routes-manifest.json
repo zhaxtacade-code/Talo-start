@@ -19,7 +19,24 @@
     "afterFiles": [],
     "fallback": []
   },
-  "dynamicRoutes": [],
+  "dynamicRoutes": [
+    {
+      "page": "/api/petrol-deliveries/[id]",
+      "regex": "^/api/petrol\\-deliveries/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/petrol\\-deliveries/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/water-orders/[id]",
+      "regex": "^/api/water\\-orders/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/water\\-orders/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
   "staticRoutes": [
     {
       "page": "/",
@@ -38,6 +55,18 @@
       "regex": "^/_not\\-found(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/petrol-deliveries",
+      "regex": "^/api/petrol\\-deliveries(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/petrol\\-deliveries(?:/)?$"
+    },
+    {
+      "page": "/api/water-orders",
+      "regex": "^/api/water\\-orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/water\\-orders(?:/)?$"
     },
     {
       "page": "/petrol",

@@ -2,6 +2,6 @@
 2:I[84966,["/_next/static/chunks/bd9b84c618712403.js","/_next/static/chunks/890501d411ba4da7.js"],"ViewportBoundary"]
 4:I[84966,["/_next/static/chunks/bd9b84c618712403.js","/_next/static/chunks/890501d411ba4da7.js"],"MetadataBoundary"]
 5:"$Sreact.suspense"
-0:{"buildId":"UtWieZnlB08GZ5HfbZj8l","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":"$@3"}],["$","div",null,{"hidden":true,"children":["$","$L4",null,{"children":["$","$5",null,{"name":"Next.Metadata","children":"$@6"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"WFsCZ3qImO-6vJvU-7fFz","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":"$@3"}],["$","div",null,{"hidden":true,"children":["$","$L4",null,{"children":["$","$5",null,{"name":"Next.Metadata","children":"$@6"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}
 3:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
 6:[["$","title","0",{"children":"Talo Star - Pure Mineral Water | Healthy & Refreshing"}],["$","meta","1",{"name":"description","content":"Talo Star pure mineral water from Diinsoor, Somalia. Clean, healthy, and refreshing water for every Somali home. Shop now for 5L bottles."}],["$","meta","2",{"name":"generator","content":"v0.app"}]]

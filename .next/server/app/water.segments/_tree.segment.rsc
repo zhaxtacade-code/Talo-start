@@ -1,5 +1,5 @@
 :HL["/_next/static/chunks/ae9febff3bbec8dc.css","style"]
-:HL["/_next/static/chunks/f442cdc5efe3f9d0.css","style"]
+:HL["/_next/static/chunks/a8efb03052cf8121.css","style"]
 :HL["/_next/static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/natural-water-spring-source-diinsoor-somalia.jpg","image"]
 :HL["/5-litre-water-bottle-premium-packaging.jpg","image"]
@@ -7,4 +7,4 @@
 :HL["/water-purification-process-testing-laboratory.jpg","image"]
 :HL["/bottling-facility-quality-control-water-production.jpg","image"]
 :HL["/mineral-water-health-benefits-infographic.jpg","image"]
-0:{"buildId":"UtWieZnlB08GZ5HfbZj8l","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"water","paramType":null,"paramKey":"water","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"WFsCZ3qImO-6vJvU-7fFz","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"water","paramType":null,"paramKey":"water","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

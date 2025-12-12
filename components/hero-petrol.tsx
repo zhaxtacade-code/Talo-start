@@ -15,6 +15,8 @@ export function Hero() {
       // Grant admin mode for deliveries
       if (typeof window !== "undefined") {
         localStorage.setItem("admin_mode", "true")
+        sessionStorage.setItem("admin_username", username)
+        sessionStorage.setItem("admin_password", password)
       }
       router.push("/petrol/deliveries")
     } else {

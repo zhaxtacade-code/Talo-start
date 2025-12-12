@@ -13,6 +13,8 @@ export function Hero() {
 
     if (username === expectedUser && password === expectedPass) {
       sessionStorage.setItem("admin_mode_water", "true")
+      sessionStorage.setItem("admin_username", username)
+      sessionStorage.setItem("admin_password", password)
       router.push("/water/orders")
     } else {
       alert("Invalid credentials")

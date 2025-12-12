@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -46,64 +46,87 @@ export default function DeliversPage() {
   const [pricePerBarrel, setPricePerBarrel] = useState("")
   const [date, setDate] = useState("")
 
-  // Load deliveries from localStorage
-  useEffect(() => {
-    setIsHydrated(true)
-    const stored = localStorage.getItem("petrol_deliveries")
-    const adminFlag = localStorage.getItem("admin_mode") === "true"
-    setIsAdmin(adminFlag)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      // Handle backward compatibility - add name field if missing
-      const deliveriesWithName = parsed.map((d: Delivery) => ({
-        ...d,
-        name: d.name || "",
-      }))
-      setDeliveries(deliveriesWithName)
-    }
-  }, [])
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Save deliveries to localStorage
-  const saveDeliveries = (newDeliveries: Delivery[]) => {
-    setDeliveries(newDeliveries)
-    localStorage.setItem("petrol_deliveries", JSON.stringify(newDeliveries))
+  const persistLocal = (data: Delivery[]) => {
+    if (typeof window === "undefined") return
+    localStorage.setItem("petrol_deliveries", JSON.stringify(data))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadLocal = (): Delivery[] => {
+    if (typeof window === "undefined") return []
+    const stored = localStorage.getItem("petrol_deliveries")
+    if (!stored) return []
+    try {
+      return JSON.parse(stored)
+    } catch {
+      return []
+    }
+  }
+
+  // Load deliveries from API (fallback to local)
+  useEffect(() => {
+    const adminFlag = typeof window !== "undefined" && localStorage.getItem("admin_mode") === "true"
+    setIsAdmin(adminFlag)
+    setIsHydrated(true)
+    void fetchDeliveries()
+  }, [])
+
+  const adminHeaders = useMemo((): Record<string, string> => {
+    if (typeof window === "undefined") return {}
+    const u = sessionStorage.getItem("admin_username") || ""
+    const p = sessionStorage.getItem("admin_password") || ""
+    return u && p ? { "x-admin-username": u, "x-admin-password": p } : {}
+  }, [isAdmin])
+
+  const fetchDeliveries = async () => {
+    try {
+      const res = await fetch("/api/petrol-deliveries")
+      if (!res.ok) throw new Error("api error")
+      const data: Delivery[] = await res.json()
+      setDeliveries(data)
+      persistLocal(data)
+    } catch (err) {
+      const local = loadLocal()
+      setDeliveries(local)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isAdmin) return
     if (!state || !name || !barrels || !pricePerBarrel || !date) return
 
-    if (editingId) {
-      // Update existing delivery
-      const updatedDeliveries = deliveries.map((d) =>
-        d.id === editingId
-          ? {
-              id: editingId,
-              state,
-              name,
-              barrels: barrels,
-              pricePerBarrel: Number.parseFloat(pricePerBarrel),
-              date,
-            }
-          : d
-      )
-      saveDeliveries(updatedDeliveries)
-      setEditingId(null)
+    const payload = { state, name, barrels, pricePerBarrel, date }
+    const res = await fetch(editingId ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries", {
+      method: editingId ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...adminHeaders,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (res.ok) {
+      await fetchDeliveries()
     } else {
-      // Create new delivery
+      // fallback to local-only save
       const newDelivery: Delivery = {
-        id: Date.now().toString(),
+        id: editingId || Date.now().toString(),
         state,
         name,
-        barrels: Number.parseInt(barrels),
+        barrels,
         pricePerBarrel: Number.parseFloat(pricePerBarrel),
         date,
       }
-      saveDeliveries([...deliveries, newDelivery])
+      const next = editingId
+        ? deliveries.map((d) => (d.id === editingId ? newDelivery : d))
+        : [...deliveries, newDelivery]
+      setDeliveries(next)
+      persistLocal(next)
     }
 
-    // Reset form
+    setEditingId(null)
     setState("")
     setName("")
     setBarrels("")
@@ -134,11 +157,64 @@ export default function DeliversPage() {
     setDate("")
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!isAdmin) return
-    if (confirm("Ma hubtaa inaad tirtirto diiwaankan?")) {
-      saveDeliveries(deliveries.filter((d) => d.id !== id))
+    if (!confirm("Ma hubtaa inaad tirtirto diiwaankan?")) return
+
+    const res = await fetch(`/api/petrol-deliveries/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...adminHeaders,
+      },
+    })
+    if (res.ok) {
+      await fetchDeliveries()
+    } else {
+      const next = deliveries.filter((d) => d.id !== id)
+      setDeliveries(next)
+      persistLocal(next)
     }
+  }
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(deliveries, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "petrol-deliveries.json"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result as string)
+        if (!Array.isArray(parsed)) throw new Error("Invalid file")
+        const normalized = parsed.map((item: any): Delivery => ({
+          id: item.id || Date.now().toString(),
+          state: item.state || "",
+          name: item.name || "",
+          barrels: item.barrels ?? "",
+          pricePerBarrel: Number.parseFloat(item.pricePerBarrel ?? "0"),
+          date: item.date || new Date().toISOString(),
+        }))
+        setDeliveries(normalized)
+        persistLocal(normalized)
+        alert("Import succeeded")
+      } catch (err) {
+        alert("Import failed: invalid file")
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ""
   }
 
   const deliveriesByState = STATES.map((stateName) => {
@@ -199,6 +275,14 @@ export default function DeliversPage() {
               Ku Noqo Petrol
             </Button>
           </Link>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={handleExport}>
+              Export JSON
+            </Button>
+            <Button onClick={handleImport}>Import JSON</Button>
+            <input ref={fileInputRef} type="file" accept="application/json" className="hidden" onChange={handleImportFile} />
+          </div>
         </div>
 
         {/* Form Section (admin only) */}

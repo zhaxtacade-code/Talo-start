@@ -1,6 +1,10 @@
 {
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
+  "/api/petrol-deliveries/[id]/route": "/api/petrol-deliveries/[id]",
+  "/api/petrol-deliveries/route": "/api/petrol-deliveries",
+  "/api/water-orders/[id]/route": "/api/water-orders/[id]",
+  "/api/water-orders/route": "/api/water-orders",
   "/page": "/",
   "/petrol/deliveries/page": "/petrol/deliveries",
   "/petrol/page": "/petrol",

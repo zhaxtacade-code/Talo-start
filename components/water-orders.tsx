@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 type Order = {
   id: string
@@ -21,63 +21,82 @@ export function WaterOrders() {
   const [pricePerUnit, setPricePerUnit] = useState("")
   const [deliveryDate, setDeliveryDate] = useState("")
   const [notes, setNotes] = useState("")
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Load from localStorage
-  useEffect(() => {
-    setIsHydrated(true)
+  const persistLocal = (data: Order[]) => {
+    if (typeof window === "undefined") return
+    localStorage.setItem("water_orders", JSON.stringify(data))
+  }
+
+  const loadLocal = (): Order[] => {
+    if (typeof window === "undefined") return []
     const stored = localStorage.getItem("water_orders")
-    const adminFlag =
-      typeof window !== "undefined" ? sessionStorage.getItem("admin_mode_water") === "true" : false
-    setIsAdmin(adminFlag)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      const normalized: Order[] = parsed.map((o: any) => ({
-        id: o.id || Date.now().toString(),
-        product: o.product || "",
-        quantity: o.quantity ?? "",
-        pricePerUnit: o.pricePerUnit ?? 0,
-        deliveryDate: o.deliveryDate || "",
-        notes: o.notes || "",
-      }))
-      setOrders(normalized)
+    if (!stored) return []
+    try {
+      return JSON.parse(stored)
+    } catch {
+      return []
     }
+  }
+
+  // Load from API
+  useEffect(() => {
+    const adminFlag = typeof window !== "undefined" ? sessionStorage.getItem("admin_mode_water") === "true" : false
+    setIsAdmin(adminFlag)
+    setIsHydrated(true)
+    void fetchOrders()
   }, [])
 
-  const handleAdminLogin = () => {
-    const key = window.prompt("Enter admin key")
-    if (key && key === process.env.NEXT_PUBLIC_ADMIN_KEY) {
-      sessionStorage.setItem("admin_mode_water", "true")
-      setIsAdmin(true)
-    } else {
-      alert("Invalid key")
+  const adminHeaders = useMemo(() => {
+    if (typeof window === "undefined") return {}
+    const u = sessionStorage.getItem("admin_username") || ""
+    const p = sessionStorage.getItem("admin_password") || ""
+    return u && p ? { "x-admin-username": u, "x-admin-password": p } : {}
+  }, [isAdmin])
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch("/api/water-orders")
+      if (!res.ok) throw new Error("api")
+      const data: Order[] = await res.json()
+      setOrders(data)
+      persistLocal(data)
+    } catch {
+      setOrders(loadLocal())
     }
   }
 
-  const handleAdminLogout = () => {
-    sessionStorage.removeItem("admin_mode_water")
-    setIsAdmin(false)
-  }
-
-  const saveOrders = (next: Order[]) => {
-    setOrders(next)
-    localStorage.setItem("water_orders", JSON.stringify(next))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isAdmin) return
     if (!product || !pricePerUnit) return
 
-    const newOrder: Order = {
-      id: Date.now().toString(),
-      product,
-      quantity,
-      pricePerUnit,
-      deliveryDate,
-      notes,
+    const payload = { product, quantity, pricePerUnit, deliveryDate, notes }
+    const res = await fetch("/api/water-orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...adminHeaders,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (res.ok) {
+      await fetchOrders()
+    } else {
+      const newOrder: Order = {
+        id: Date.now().toString(),
+        product,
+        quantity,
+        pricePerUnit,
+        deliveryDate,
+        notes,
+      }
+      const next = [...orders, newOrder]
+      setOrders(next)
+      persistLocal(next)
     }
 
-    saveOrders([...orders, newOrder])
     setProduct("")
     setQuantity("")
     setPricePerUnit("")
@@ -85,9 +104,62 @@ export function WaterOrders() {
     setNotes("")
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!isAdmin) return
-    saveOrders(orders.filter((o) => o.id !== id))
+    const res = await fetch(`/api/water-orders/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...adminHeaders,
+      },
+    })
+    if (res.ok) {
+      await fetchOrders()
+    } else {
+      const next = orders.filter((o) => o.id !== id)
+      setOrders(next)
+      persistLocal(next)
+    }
+  }
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(orders, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "water-orders.json"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result as string)
+        if (!Array.isArray(parsed)) throw new Error("Invalid")
+        const normalized = parsed.map((o: any): Order => ({
+          id: o.id || Date.now().toString(),
+          product: o.product || "",
+          quantity: o.quantity ?? "",
+          pricePerUnit: o.pricePerUnit ?? 0,
+          deliveryDate: o.deliveryDate || "",
+          notes: o.notes || "",
+        }))
+        setOrders(normalized)
+        persistLocal(normalized)
+        alert("Import succeeded")
+      } catch {
+        alert("Import failed: invalid file")
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ""
   }
 
   const parseNumber = (value: string | number): number => {
@@ -135,6 +207,29 @@ export function WaterOrders() {
               <p className="text-sm font-semibold text-accent uppercase tracking-wide">Warshada Qeybta Beeca</p>
               <h2 className="heading-md text-primary">Waxii Baxay</h2>
               <p className="text-foreground/70 text-sm">Geli badeecada, tirada, qiimaha iyo taariikhda dirista.</p>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
+                >
+                  Export JSON
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImport}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
+                >
+                  Import JSON
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={handleImportFile}
+                />
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
