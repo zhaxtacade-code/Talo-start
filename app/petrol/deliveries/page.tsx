@@ -92,19 +92,25 @@ export default function DeliversPage() {
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         console.error("API Error:", res.status, errorData)
-        // Still try to use local as fallback, but log the error
-        const local = loadLocal()
-        if (local.length > 0) {
-          setDeliveries(local)
+        // If Supabase is not configured, show empty array (don't use localStorage)
+        if (res.status === 503) {
+          console.warn("Supabase not configured - data will not sync across devices")
+          setDeliveries([])
+          return
         }
+        // For other errors, try localStorage as last resort
+        const local = loadLocal()
+        setDeliveries(local)
         return
       }
       const data: Delivery[] = await res.json()
-      console.log("Fetched deliveries from Supabase:", data.length)
+      console.log("✅ Fetched deliveries from Supabase:", data.length)
+      // Always use Supabase data when available - this ensures sync across devices
       setDeliveries(data)
-      persistLocal(data)
+      persistLocal(data) // Update localStorage with Supabase data
     } catch (err) {
       console.error("Error fetching deliveries:", err)
+      // Only use localStorage if network completely fails
       const local = loadLocal()
       setDeliveries(local)
     }
@@ -126,9 +132,13 @@ export default function DeliversPage() {
     })
 
     if (res.ok) {
+      console.log("✅ Delivery saved to Supabase successfully")
       await fetchDeliveries()
     } else {
-      // fallback to local-only save
+      const errorData = await res.json().catch(() => ({}))
+      console.error("❌ Failed to save to Supabase:", errorData)
+      alert(`Failed to save to database: ${errorData.error || "Unknown error"}. Data will not sync across devices.`)
+      // Only save to localStorage as last resort
       const newDelivery: Delivery = {
         id: editingId || Date.now().toString(),
         state,

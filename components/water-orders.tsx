@@ -67,19 +67,25 @@ export function WaterOrders() {
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         console.error("API Error:", res.status, errorData)
-        // Still try to use local as fallback, but log the error
-        const local = loadLocal()
-        if (local.length > 0) {
-          setOrders(local)
+        // If Supabase is not configured, show empty array (don't use localStorage)
+        if (res.status === 503) {
+          console.warn("Supabase not configured - data will not sync across devices")
+          setOrders([])
+          return
         }
+        // For other errors, try localStorage as last resort
+        const local = loadLocal()
+        setOrders(local)
         return
       }
       const data: Order[] = await res.json()
-      console.log("Fetched orders from Supabase:", data.length)
+      console.log("✅ Fetched orders from Supabase:", data.length)
+      // Always use Supabase data when available - this ensures sync across devices
       setOrders(data)
-      persistLocal(data)
+      persistLocal(data) // Update localStorage with Supabase data
     } catch (err) {
       console.error("Error fetching orders:", err)
+      // Only use localStorage if network completely fails
       const local = loadLocal()
       setOrders(local)
     }
@@ -101,8 +107,13 @@ export function WaterOrders() {
     })
 
     if (res.ok) {
+      console.log("✅ Order saved to Supabase successfully")
       await fetchOrders()
     } else {
+      const errorData = await res.json().catch(() => ({}))
+      console.error("❌ Failed to save to Supabase:", errorData)
+      alert(`Failed to save to database: ${errorData.error || "Unknown error"}. Data will not sync across devices.`)
+      // Only save to localStorage as last resort
       const newOrder: Order = {
         id: Date.now().toString(),
         product,
