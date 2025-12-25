@@ -131,14 +131,22 @@ export default function DeliversPage() {
     const payload = { state, name, barrels, pricePerBarrel, date }
     // Only use PUT if editingId exists, is a string, and is a valid UUID (from Supabase)
     // If it's not a UUID (from localStorage) or undefined, create a new record instead
-    const isEditing = editingId && typeof editingId === "string" && isValidUUID(editingId)
+    const isEditing = editingId && typeof editingId === "string" && editingId !== "undefined" && isValidUUID(editingId)
     
     if (editingId && !isEditing) {
       console.warn("Editing ID is not a valid UUID, creating new record instead:", editingId)
+      // Clear editingId to ensure we create a new record
+      setEditingId(null)
     }
     
-    const res = await fetch(isEditing ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries", {
-      method: isEditing ? "PUT" : "POST",
+    // Double-check: never use PUT if editingId is invalid
+    const url = isEditing && editingId ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries"
+    const method = isEditing && editingId ? "PUT" : "POST"
+    
+    console.log("Submitting:", { isEditing, editingId, url, method })
+    
+    const res = await fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
         ...adminHeaders,
