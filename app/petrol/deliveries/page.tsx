@@ -89,11 +89,22 @@ export default function DeliversPage() {
   const fetchDeliveries = async () => {
     try {
       const res = await fetch("/api/petrol-deliveries")
-      if (!res.ok) throw new Error("api error")
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        console.error("API Error:", res.status, errorData)
+        // Still try to use local as fallback, but log the error
+        const local = loadLocal()
+        if (local.length > 0) {
+          setDeliveries(local)
+        }
+        return
+      }
       const data: Delivery[] = await res.json()
+      console.log("Fetched deliveries from Supabase:", data.length)
       setDeliveries(data)
       persistLocal(data)
     } catch (err) {
+      console.error("Error fetching deliveries:", err)
       const local = loadLocal()
       setDeliveries(local)
     }

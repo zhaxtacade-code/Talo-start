@@ -64,12 +64,24 @@ export function WaterOrders() {
   const fetchOrders = async () => {
     try {
       const res = await fetch("/api/water-orders")
-      if (!res.ok) throw new Error("api")
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        console.error("API Error:", res.status, errorData)
+        // Still try to use local as fallback, but log the error
+        const local = loadLocal()
+        if (local.length > 0) {
+          setOrders(local)
+        }
+        return
+      }
       const data: Order[] = await res.json()
+      console.log("Fetched orders from Supabase:", data.length)
       setOrders(data)
       persistLocal(data)
-    } catch {
-      setOrders(loadLocal())
+    } catch (err) {
+      console.error("Error fetching orders:", err)
+      const local = loadLocal()
+      setOrders(local)
     }
   }
 
