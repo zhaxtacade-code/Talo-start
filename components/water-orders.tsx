@@ -45,6 +45,13 @@ export function WaterOrders() {
     setIsAdmin(adminFlag)
     setIsHydrated(true)
     void fetchOrders()
+
+    // Auto-refresh every 5 seconds to sync with other admins
+    const interval = setInterval(() => {
+      void fetchOrders()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const adminHeaders = useMemo(() => {

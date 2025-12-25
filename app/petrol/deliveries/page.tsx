@@ -70,6 +70,13 @@ export default function DeliversPage() {
     setIsAdmin(adminFlag)
     setIsHydrated(true)
     void fetchDeliveries()
+
+    // Auto-refresh every 5 seconds to sync with other admins
+    const interval = setInterval(() => {
+      void fetchDeliveries()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const adminHeaders = useMemo((): Record<string, string> => {
