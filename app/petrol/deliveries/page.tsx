@@ -117,7 +117,8 @@ export default function DeliversPage() {
   }
 
   // Helper function to check if ID is a valid UUID
-  const isValidUUID = (id: string): boolean => {
+  const isValidUUID = (id: string | null | undefined): boolean => {
+    if (!id || typeof id !== "string") return false
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     return uuidRegex.test(id)
   }
@@ -128,9 +129,14 @@ export default function DeliversPage() {
     if (!state || !name || !barrels || !pricePerBarrel || !date) return
 
     const payload = { state, name, barrels, pricePerBarrel, date }
-    // Only use PUT if editingId exists and is a valid UUID (from Supabase)
-    // If it's not a UUID (from localStorage), create a new record instead
-    const isEditing = editingId && isValidUUID(editingId)
+    // Only use PUT if editingId exists, is a string, and is a valid UUID (from Supabase)
+    // If it's not a UUID (from localStorage) or undefined, create a new record instead
+    const isEditing = editingId && typeof editingId === "string" && isValidUUID(editingId)
+    
+    if (editingId && !isEditing) {
+      console.warn("Editing ID is not a valid UUID, creating new record instead:", editingId)
+    }
+    
     const res = await fetch(isEditing ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries", {
       method: isEditing ? "PUT" : "POST",
       headers: {
