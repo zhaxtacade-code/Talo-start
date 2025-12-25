@@ -116,14 +116,23 @@ export default function DeliversPage() {
     }
   }
 
+  // Helper function to check if ID is a valid UUID
+  const isValidUUID = (id: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return uuidRegex.test(id)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isAdmin) return
     if (!state || !name || !barrels || !pricePerBarrel || !date) return
 
     const payload = { state, name, barrels, pricePerBarrel, date }
-    const res = await fetch(editingId ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries", {
-      method: editingId ? "PUT" : "POST",
+    // Only use PUT if editingId exists and is a valid UUID (from Supabase)
+    // If it's not a UUID (from localStorage), create a new record instead
+    const isEditing = editingId && isValidUUID(editingId)
+    const res = await fetch(isEditing ? `/api/petrol-deliveries/${editingId}` : "/api/petrol-deliveries", {
+      method: isEditing ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json",
         ...adminHeaders,

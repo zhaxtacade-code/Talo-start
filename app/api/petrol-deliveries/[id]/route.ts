@@ -8,6 +8,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = params
+  
+  // Validate that ID is a valid UUID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    return NextResponse.json({ error: `Invalid UUID format: ${id}. Cannot update record with non-UUID ID.` }, { status: 400 })
+  }
+
   const body = await req.json()
   const { state, name, barrels, pricePerBarrel, date } = body
 
