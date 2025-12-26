@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { product, quantity, pricePerUnit, deliveryDate, notes } = body
+  const { product, quantity, pricePerUnit, deliveryDate, notes, bottleType } = body
   if (!product || !pricePerUnit) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
   }
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     pricePerUnit: Number.parseFloat(pricePerUnit),
     deliveryDate,
     notes,
+    bottleType: bottleType || "large", // Default to large if not specified
   }
 
   const { data, error } = await supabaseAdmin.from("water_orders").insert(payload).select("*").single()

@@ -9,6 +9,7 @@ type Order = {
   pricePerUnit: string | number
   deliveryDate: string
   notes?: string
+  bottleType?: "small" | "large"
 }
 
 export function WaterOrders() {
@@ -21,6 +22,8 @@ export function WaterOrders() {
   const [pricePerUnit, setPricePerUnit] = useState("")
   const [deliveryDate, setDeliveryDate] = useState("")
   const [notes, setNotes] = useState("")
+  const [bottleType, setBottleType] = useState<"small" | "large">("large")
+  const [activeTab, setActiveTab] = useState<"small" | "large" | "all">("all")
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const persistLocal = (data: Order[]) => {
@@ -96,7 +99,7 @@ export function WaterOrders() {
     if (!isAdmin) return
     if (!product || !pricePerUnit) return
 
-    const payload = { product, quantity, pricePerUnit, deliveryDate, notes }
+    const payload = { product, quantity, pricePerUnit, deliveryDate, notes, bottleType }
     const res = await fetch("/api/water-orders", {
       method: "POST",
       headers: {
@@ -121,6 +124,7 @@ export function WaterOrders() {
         pricePerUnit,
         deliveryDate,
         notes,
+        bottleType,
       }
       const next = [...orders, newOrder]
       setOrders(next)
@@ -132,6 +136,7 @@ export function WaterOrders() {
     setPricePerUnit("")
     setDeliveryDate("")
     setNotes("")
+    // Keep bottleType for next entry
   }
 
   const handleDelete = async (id: string) => {
@@ -180,6 +185,7 @@ export function WaterOrders() {
           pricePerUnit: o.pricePerUnit ?? 0,
           deliveryDate: o.deliveryDate || "",
           notes: o.notes || "",
+          bottleType: o.bottleType || "large",
         }))
         setOrders(normalized)
         persistLocal(normalized)
@@ -198,9 +204,11 @@ export function WaterOrders() {
     return Number.isFinite(parsed) ? parsed : 0
   }
 
-  const totalQuantity = useMemo(() => {
-    return orders.reduce((sum, o) => sum + parseNumber(o.quantity), 0)
-  }, [orders])
+  // Filter orders by active tab
+  const filteredOrders = useMemo(() => {
+    if (activeTab === "all") return orders
+    return orders.filter((o) => (o.bottleType || "large") === activeTab)
+  }, [orders, activeTab])
 
   const lineTotal = (o: Order) => {
     const qty = parseNumber(o.quantity)
@@ -208,9 +216,34 @@ export function WaterOrders() {
     return (qty > 0 ? qty * unit : unit)
   }
 
-  const totalRevenue = useMemo(() => {
-    return orders.reduce((sum, o) => sum + lineTotal(o), 0)
+  // Small bottles only (for monthly totals)
+  const smallBottles = useMemo(() => {
+    return orders.filter((o) => (o.bottleType || "large") === "small")
   }, [orders])
+
+  // Monthly totals for small bottles
+  const monthlyTotals = useMemo(() => {
+    const monthly: Record<string, { quantity: number; revenue: number }> = {}
+    smallBottles.forEach((order) => {
+      if (!order.deliveryDate) return
+      const date = new Date(order.deliveryDate)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+      if (!monthly[monthKey]) {
+        monthly[monthKey] = { quantity: 0, revenue: 0 }
+      }
+      monthly[monthKey].quantity += parseNumber(order.quantity)
+      monthly[monthKey].revenue += lineTotal(order)
+    })
+    return monthly
+  }, [smallBottles])
+
+  const totalQuantity = useMemo(() => {
+    return filteredOrders.reduce((sum, o) => sum + parseNumber(o.quantity), 0)
+  }, [filteredOrders])
+
+  const totalRevenue = useMemo(() => {
+    return filteredOrders.reduce((sum, o) => sum + lineTotal(o), 0)
+  }, [filteredOrders])
 
   if (!isHydrated) {
     return (
@@ -264,11 +297,23 @@ export function WaterOrders() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Nooca Dhalada</label>
+                <select
+                  value={bottleType}
+                  onChange={(e) => setBottleType(e.target.value as "small" | "large")}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+                >
+                  <option value="large">Dhalada Weyn (20L)</option>
+                  <option value="small">Dhalada Yar (Daily Delivery)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Magaca sheeyga baxay</label>
                 <input
                   value={product}
                   onChange={(e) => setProduct(e.target.value)}
-                  placeholder="e.g. 5L Bottle, 19L Dispenser"
+                  placeholder={bottleType === "small" ? "e.g. Small Bottle, 500ml" : "e.g. 20L Bottle, 19L Dispenser"}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                 />
               </div>
@@ -326,6 +371,71 @@ export function WaterOrders() {
 
           {/* Orders list */}
           <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+            {/* Tabs */}
+            <div className="flex gap-2 mb-4 border-b border-slate-200">
+              <button
+                type="button"
+                onClick={() => setActiveTab("all")}
+                className={`px-4 py-2 font-medium text-sm transition-colors ${
+                  activeTab === "all"
+                    ? "text-accent border-b-2 border-accent"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                All ({orders.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("small")}
+                className={`px-4 py-2 font-medium text-sm transition-colors ${
+                  activeTab === "small"
+                    ? "text-accent border-b-2 border-accent"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Small Bottles ({smallBottles.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("large")}
+                className={`px-4 py-2 font-medium text-sm transition-colors ${
+                  activeTab === "large"
+                    ? "text-accent border-b-2 border-accent"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Large (20L) ({orders.filter((o) => (o.bottleType || "large") === "large").length})
+              </button>
+            </div>
+
+            {/* Monthly Totals for Small Bottles */}
+            {activeTab === "small" && Object.keys(monthlyTotals).length > 0 && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-slate-900 mb-3">Monthly Totals (Small Bottles)</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(monthlyTotals)
+                    .sort()
+                    .reverse()
+                    .map(([month, totals]) => {
+                      const [year, monthNum] = month.split("-")
+                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString("default", {
+                        month: "long",
+                        year: "numeric",
+                      })
+                      return (
+                        <div key={month} className="bg-white p-3 rounded border border-blue-100">
+                          <p className="text-sm font-medium text-slate-700">{monthName}</p>
+                          <p className="text-xs text-slate-500">Quantity: {totals.quantity.toLocaleString()}</p>
+                          <p className="text-sm font-bold text-green-600">
+                            ${totals.revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      )
+                    })}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-sm font-semibold text-accent uppercase tracking-wide">Records</p>
@@ -347,13 +457,14 @@ export function WaterOrders() {
               </div>
             </div>
 
-            {orders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <p className="text-foreground/50 text-center py-10">No orders yet</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-slate-200">
+                      <th className="py-3 px-4 text-sm font-medium text-slate-700">Type</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Magaca sheeyga baxay</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Imisa xabo</th>
                       <th className="py-3 px-4 text-sm font-medium text-slate-700">Qiimaha</th>
@@ -364,8 +475,19 @@ export function WaterOrders() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                       <tr key={order.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded ${
+                              (order.bottleType || "large") === "small"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-purple-100 text-purple-700"
+                            }`}
+                          >
+                            {(order.bottleType || "large") === "small" ? "Small" : "20L"}
+                          </span>
+                        </td>
                         <td className="py-3 px-4 text-slate-900 font-medium">{order.product}</td>
                         <td className="py-3 px-4 text-slate-900">{order.quantity}</td>
                         <td className="py-3 px-4 text-slate-900">
