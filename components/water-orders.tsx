@@ -303,7 +303,7 @@ export function WaterOrders() {
                   onChange={(e) => setBottleType(e.target.value as "small" | "large")}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                 >
-                  <option value="large">Dhalada Weyn (20L)</option>
+                  <option value="large">Xisaab Guud</option>
                   <option value="small">Dhalada Yar (Daily Delivery)</option>
                 </select>
               </div>
@@ -404,7 +404,7 @@ export function WaterOrders() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Large (20L) ({orders.filter((o) => (o.bottleType || "large") === "large").length})
+                Xisaab Guud ({orders.filter((o) => (o.bottleType || "large") === "large").length})
               </button>
             </div>
 
@@ -485,7 +485,7 @@ export function WaterOrders() {
                                 : "bg-purple-100 text-purple-700"
                             }`}
                           >
-                            {(order.bottleType || "large") === "small" ? "Small" : "20L"}
+                            {(order.bottleType || "large") === "small" ? "Small" : "Xisaab Guud"}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-slate-900 font-medium">{order.product}</td>
